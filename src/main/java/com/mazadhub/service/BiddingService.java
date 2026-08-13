@@ -10,6 +10,7 @@ import com.mazadhub.domain.Bid;
 import com.mazadhub.domain.Item;
 import com.mazadhub.domain.ItemStatus;
 import com.mazadhub.domain.User;
+import com.mazadhub.exception.AlreadyHighestBidderException;
 import com.mazadhub.exception.AuctionClosedException;
 import com.mazadhub.exception.BuyNowNotAvailableException;
 import com.mazadhub.exception.ItemNotFoundException;
@@ -95,6 +96,11 @@ public class BiddingService {
         User bidder = users.findById(bidderId)
                 .orElseThrow(() -> new UserNotFoundException(bidderId));
         Instant now = now();
+
+        // You can't outbid yourself: reject if you're already the highest bidder.
+        if (item.getWinner() != null && item.getWinner().getId().equals(bidder.getId())) {
+            throw new AlreadyHighestBidderException(itemId);
+        }
 
         // Reject closed auctions and amounts below the minimum next bid.
         AuctionSnapshot snapshot =

@@ -1,6 +1,7 @@
 package com.mazadhub.api.mapper;
 
 import com.mazadhub.api.dto.ApiError;
+import com.mazadhub.exception.AlreadyHighestBidderException;
 import com.mazadhub.exception.AuctionClosedException;
 import com.mazadhub.exception.BidTooLowException;
 import com.mazadhub.exception.BuyNowNotAvailableException;
@@ -50,7 +51,8 @@ public class RestExceptionMapper implements ExceptionMapper<RuntimeException> {
         if (ex instanceof InvalidCredentialsException) {
             return new Status(401, "unauthorized");
         }
-        if (ex instanceof BidTooLowException
+        if (ex instanceof AlreadyHighestBidderException
+                || ex instanceof BidTooLowException
                 || ex instanceof AuctionClosedException
                 || ex instanceof BuyNowNotAvailableException
                 || ex instanceof UserAlreadyExistsException) {
