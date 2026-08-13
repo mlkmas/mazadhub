@@ -1,0 +1,52 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <ui:define name="content">
+        <h1 class="page">Welcome</h1>
+        <div class="two">
+            <div class="card">
+                <h2 class="sec">Sign in</h2>
+                <h:form>
+                    <h:inputHidden value="#{itemDetailBean.itemId}"/>
+                    <div class="field">
+                        <h:outputLabel for="u" value="Username"/>
+                        <h:inputText id="u" value="#{loginBean.username}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="p" value="Password"/>
+                        <h:inputSecret id="p" value="#{loginBean.password}"/>
+                    </div>
+                    <h:commandButton styleClass="btn btn-go" value="Sign in" action="#{loginBean.login}"/>
+                </h:form>
+            </div>
+
+            <div class="card">
+                <h2 class="sec">Create an account</h2>
+                <h:form>
+                    <div class="field">
+                        <h:outputLabel for="ru" value="Username"/>
+                        <h:inputText id="ru" value="#{loginBean.regUsername}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="rp" value="Password"/>
+                        <h:inputSecret id="rp" value="#{loginBean.regPassword}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="rn" value="Full name"/>
+                        <h:inputText id="rn" value="#{loginBean.regFullName}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="re" value="Email"/>
+                        <h:inputText id="re" value="#{loginBean.regEmail}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="rph" value="Phone"/>
+                        <h:inputText id="rph" value="#{loginBean.regPhone}"/>
+                    </div>
+                    <h:commandButton styleClass="btn btn-go" value="Create account" action="#{loginBean.register}"/>
+                </h:form>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

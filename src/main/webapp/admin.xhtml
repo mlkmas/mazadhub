@@ -1,0 +1,73 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{adminBean.guard}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h1 class="page">Admin dashboard</h1>
+        <div class="admin">
+            <div class="card">
+                <h2 class="sec">Categories</h2>
+                <table>
+                    <thead><tr><th>Category</th><th>Items</th></tr></thead>
+                    <tbody>
+                        <ui:repeat value="#{adminBean.categoryList}" var="c">
+                            <tr><td>#{c.name}</td><td>#{adminBean.itemsIn(c)}</td></tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+                <h:form>
+                    <h:inputHidden value="#{itemDetailBean.itemId}"/>
+                    <div class="addrow">
+                        <h:inputText value="#{adminBean.newCategoryName}"
+                                     a:placeholder="New category name"
+                                     xmlns:a="jakarta.faces.passthrough"/>
+                        <h:commandButton styleClass="btn btn-go" value="Add" action="#{adminBean.addCategory}"/>
+                    </div>
+                </h:form>
+            </div>
+
+            <div class="card">
+                <h2 class="sec">Users</h2>
+                <table>
+                    <thead><tr><th>Username</th><th>Role</th><th>Action</th></tr></thead>
+                    <tbody>
+                        <ui:repeat value="#{adminBean.users}" var="u">
+                            <tr>
+                                <td>#{u.username}</td>
+                                <td><span class="chip #{u.role eq 'ADMIN' ? 'chip-info' : 'chip-gray'}">#{u.role}</span></td>
+                                <td>
+                                    <h:form rendered="#{u.role ne 'ADMIN'}">
+                                        <h:commandLink value="Make admin" action="#{adminBean.promoteToAdmin(u)}"/>
+                                    </h:form>
+                                    <h:outputText value="—" rendered="#{u.role eq 'ADMIN'}"/>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card full">
+                <h2 class="sec">Active auctions</h2>
+                <table>
+                    <thead><tr><th>Item</th><th>Seller</th><th>Current price</th><th>Ends in</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <ui:repeat value="#{adminBean.activeAuctions}" var="i">
+                            <tr>
+                                <td><h:link outcome="item" value="#{i.title}"><f:param name="id" value="#{i.id}"/></h:link></td>
+                                <td>#{i.seller.username}</td>
+                                <td class="price">#{fmt.money(i.currentPrice)}</td>
+                                <td class="muted">#{fmt.timeLeft(i.endDate)}</td>
+                                <td><span class="chip chip-info">#{i.status}</span></td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

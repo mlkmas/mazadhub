@@ -1,0 +1,53 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{myAccountBean.load}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h1 class="page">My account</h1>
+
+        <h2 class="sec">My items (auctions I listed)</h2>
+        <table>
+            <thead>
+                <tr><th>Item</th><th>Current price</th><th>Bids</th><th>Status</th><th></th></tr>
+            </thead>
+            <tbody>
+                <ui:repeat value="#{myAccountBean.myItems}" var="i">
+                    <tr>
+                        <td><h:link outcome="item" value="#{i.title}"><f:param name="id" value="#{i.id}"/></h:link></td>
+                        <td class="price">#{fmt.money(i.currentPrice)}</td>
+                        <td>#{myAccountBean.bidCount(i)}</td>
+                        <td><span class="chip #{i.status eq 'ACTIVE' ? 'chip-info' : 'chip-gray'}">#{i.status}</span></td>
+                        <td><h:link outcome="results" value="View result"><f:param name="id" value="#{i.id}"/></h:link></td>
+                    </tr>
+                </ui:repeat>
+            </tbody>
+        </table>
+        <h:panelGroup rendered="#{empty myAccountBean.myItems}"><p class="muted">You haven't listed any items yet.</p></h:panelGroup>
+
+        <h2 class="sec">My bids (auctions I took part in)</h2>
+        <table>
+            <thead>
+                <tr><th>Item</th><th>My highest bid</th><th>Current price</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+                <ui:repeat value="#{myAccountBean.myBids}" var="i">
+                    <tr>
+                        <td><h:link outcome="item" value="#{i.title}"><f:param name="id" value="#{i.id}"/></h:link></td>
+                        <td>#{fmt.money(myAccountBean.myBid(i))}</td>
+                        <td class="price">#{fmt.money(i.currentPrice)}</td>
+                        <td>
+                            <span class="chip #{myAccountBean.bidStatus(i) eq 'Leading' or myAccountBean.bidStatus(i) eq 'Won' ? 'chip-go' : 'chip-warn'}">
+                                #{myAccountBean.bidStatus(i)}
+                            </span>
+                        </td>
+                    </tr>
+                </ui:repeat>
+            </tbody>
+        </table>
+        <h:panelGroup rendered="#{empty myAccountBean.myBids}"><p class="muted">You haven't bid on anything yet.</p></h:panelGroup>
+    </ui:define>
+</ui:composition>

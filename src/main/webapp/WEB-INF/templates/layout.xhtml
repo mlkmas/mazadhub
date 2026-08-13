@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>mazadHub</title>
+    <h:outputStylesheet name="css/mazadhub.css"/>
+</h:head>
+<h:body>
+    <div class="topbar">
+        <div class="logo">mazad<span>Hub</span></div>
+        <div class="nav">
+            <h:link outcome="catalog" value="Catalog"/>
+            <h:link outcome="sell" value="Sell an item" rendered="#{sessionBean.loggedIn}"/>
+            <h:link outcome="account" value="My Account" rendered="#{sessionBean.loggedIn}"/>
+            <h:link outcome="admin" value="Admin" rendered="#{sessionBean.admin}"/>
+            <h:outputText styleClass="me" value="Hello, #{sessionBean.displayName}"
+                          rendered="#{sessionBean.loggedIn}"/>
+            <h:form style="display:inline" rendered="#{sessionBean.loggedIn}">
+                <h:commandLink value="Logout" action="#{sessionBean.logout}"/>
+            </h:form>
+            <h:link outcome="login" value="Login / Register" rendered="#{not sessionBean.loggedIn}"/>
+        </div>
+    </div>
+
+    <div class="wrap">
+        <div class="messages">
+            <h:messages globalOnly="true" layout="list"
+                        infoClass="ok" errorClass="err" warnClass="err"/>
+        </div>
+        <ui:insert name="content"/>
+    </div>
+</h:body>
+</html>

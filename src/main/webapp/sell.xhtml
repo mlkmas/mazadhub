@@ -1,0 +1,56 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <f:metadata>
+        <f:viewAction action="#{sellItemBean.guard}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h1 class="page">List a new item for sale</h1>
+        <div class="card" style="max-width:640px">
+            <h:form>
+                <h:inputHidden value="#{itemDetailBean.itemId}"/>
+                <div class="two">
+                    <div class="field">
+                        <h:outputLabel for="cat" value="Category"/>
+                        <h:selectOneMenu id="cat" value="#{sellItemBean.categoryId}">
+                            <f:selectItem itemLabel="-- choose --" itemValue="#{null}"/>
+                            <f:selectItems value="#{sellItemBean.categories}" var="c"
+                                           itemLabel="#{c.name}" itemValue="#{c.id}"/>
+                        </h:selectOneMenu>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="t" value="Title"/>
+                        <h:inputText id="t" value="#{sellItemBean.title}"/>
+                    </div>
+                </div>
+                <div class="field">
+                    <h:outputLabel for="d" value="Description"/>
+                    <h:inputTextarea id="d" rows="3" value="#{sellItemBean.description}"/>
+                </div>
+                <div class="two">
+                    <div class="field">
+                        <h:outputLabel for="sp" value="Starting price (ILS)"/>
+                        <h:inputText id="sp" value="#{sellItemBean.startPrice}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="bn" value="Buy-now price (optional)"/>
+                        <h:inputText id="bn" value="#{sellItemBean.buyNowPrice}"/>
+                    </div>
+                </div>
+                <div class="two">
+                    <div class="field">
+                        <h:outputLabel for="dur" value="Duration (days)"/>
+                        <h:inputText id="dur" value="#{sellItemBean.durationDays}"/>
+                    </div>
+                    <div class="field">
+                        <h:outputLabel for="img" value="Image URL"/>
+                        <h:inputText id="img" value="#{sellItemBean.imageUrl}"/>
+                    </div>
+                </div>
+                <h:commandButton styleClass="btn btn-go" value="Publish item" action="#{sellItemBean.publish}"/>
+            </h:form>
+        </div>
+    </ui:define>
+</ui:composition>

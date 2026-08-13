@@ -1,0 +1,96 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <f:metadata>
+        <f:viewParam name="id" value="#{itemDetailBean.itemId}"/>
+        <f:viewAction action="#{itemDetailBean.load}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <h:panelGroup rendered="#{empty itemDetailBean.item}">
+            <p class="muted">Item not found.</p>
+        </h:panelGroup>
+
+        <h:panelGroup rendered="#{not empty itemDetailBean.item}">
+            <div class="detail">
+                <div class="hero-img">
+                    <h:graphicImage value="#{itemDetailBean.item.imageUrl}"
+                                    rendered="#{not empty itemDetailBean.item.imageUrl}"/>
+                </div>
+                <div>
+                    <h1 class="page">#{itemDetailBean.item.title}</h1>
+                    <div class="meta-line">
+                        <span>Category: #{itemDetailBean.item.category.name}</span>
+                        <span>#{itemDetailBean.bidCount} bids</span>
+                        <span>Ends in #{fmt.timeLeft(itemDetailBean.item.endDate)}</span>
+                        <span>Status: #{itemDetailBean.item.status}</span>
+                    </div>
+
+                    <div class="price-band">
+                        <div class="muted">Current price</div>
+                        <div class="price big">#{fmt.money(itemDetailBean.item.currentPrice)}</div>
+                        <div class="muted">Next minimum bid: #{fmt.money(itemDetailBean.minNextBid)}</div>
+                    </div>
+
+                    <h:panelGroup rendered="#{not sessionBean.loggedIn}">
+                        <p class="muted">Please <h:link outcome="login" value="log in"/> to bid.</p>
+                    </h:panelGroup>
+
+                    <h:panelGroup rendered="#{sessionBean.loggedIn and itemDetailBean.item.status eq 'ACTIVE'}">
+                        <div class="bidbox">
+                            <h2 class="sec">Place a bid</h2>
+                            <h:form>
+                                <div class="bidrow">
+                                    <h:inputText value="#{itemDetailBean.bidAmount}"
+                                                 a:placeholder="Your bid amount"
+                                                 xmlns:a="jakarta.faces.passthrough"/>
+                                    <h:commandButton styleClass="btn btn-go" value="Bid"
+                                                     action="#{itemDetailBean.placeBid}"/>
+                                </div>
+                            </h:form>
+                            <h:form>
+                                <div class="bidrow">
+                                    <h:inputText value="#{itemDetailBean.autoMax}"
+                                                 a:placeholder="Automatic bidding — hidden max"
+                                                 xmlns:a="jakarta.faces.passthrough"/>
+                                    <h:commandButton styleClass="btn btn-ghost" value="Set auto-bid"
+                                                     action="#{itemDetailBean.placeAutoBid}"/>
+                                </div>
+                            </h:form>
+                            <h:form rendered="#{not empty itemDetailBean.item.buyNowPrice}">
+                                <h:commandButton styleClass="btn btn-gold"
+                                                 style="width:100%"
+                                                 value="Buy now · #{fmt.money(itemDetailBean.item.buyNowPrice)}"
+                                                 action="#{itemDetailBean.buyNow}"/>
+                            </h:form>
+                        </div>
+                    </h:panelGroup>
+                </div>
+            </div>
+
+            <h2 class="sec">Bid history</h2>
+            <table>
+                <thead>
+                    <tr><th>Amount</th><th>Time</th><th>Type</th></tr>
+                </thead>
+                <tbody>
+                    <ui:repeat value="#{itemDetailBean.history}" var="b">
+                        <tr>
+                            <td class="price">#{fmt.money(b.amount)}</td>
+                            <td class="muted">#{fmt.dateTime(b.bidTime)}</td>
+                            <td>
+                                <span class="chip #{b.auto ? 'chip-info' : 'chip-gray'}">
+                                    #{b.auto ? 'Automatic' : 'Manual'}
+                                </span>
+                            </td>
+                        </tr>
+                    </ui:repeat>
+                </tbody>
+            </table>
+            <h:panelGroup rendered="#{empty itemDetailBean.history}">
+                <p class="muted">No bids yet.</p>
+            </h:panelGroup>
+        </h:panelGroup>
+    </ui:define>
+</ui:composition>

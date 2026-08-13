@@ -1,0 +1,62 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <f:metadata>
+        <f:viewParam name="category" value="#{catalogBean.selectedCategoryId}"/>
+        <f:viewParam name="q" value="#{catalogBean.keyword}"/>
+        <f:viewAction action="#{catalogBean.load}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <div class="catalog">
+            <aside class="side">
+                <h2 class="sec">Categories</h2>
+                <ul>
+                    <li><h:link outcome="catalog" value="All items"/></li>
+                    <ui:repeat value="#{catalogBean.categories}" var="c">
+                        <li>
+                            <h:link outcome="catalog" value="#{c.name}">
+                                <f:param name="category" value="#{c.id}"/>
+                            </h:link>
+                        </li>
+                    </ui:repeat>
+                </ul>
+            </aside>
+
+            <div>
+                <h:form>
+                    <h:inputHidden value="#{itemDetailBean.itemId}"/>
+                    <div class="searchbar">
+                        <h:inputText value="#{catalogBean.keyword}" a:placeholder="Search items..."
+                                     xmlns:a="jakarta.faces.passthrough"/>
+                        <h:commandButton styleClass="btn btn-go" value="Search"
+                                         action="catalog?faces-redirect=true&amp;includeViewParams=true"/>
+                    </div>
+                </h:form>
+
+                <h:panelGroup rendered="#{empty catalogBean.results}">
+                    <p class="muted">No items found.</p>
+                </h:panelGroup>
+
+                <div class="grid">
+                    <ui:repeat value="#{catalogBean.results}" var="i">
+                        <h:link outcome="item" styleClass="tile">
+                            <f:param name="id" value="#{i.id}"/>
+                            <div class="thumb">
+                                <h:graphicImage value="#{i.imageUrl}" rendered="#{not empty i.imageUrl}"/>
+                            </div>
+                            <div class="tile-b">
+                                <div class="tile-t">#{i.title}</div>
+                                <div class="tile-meta">
+                                    <span class="price">#{fmt.money(i.currentPrice)}</span>
+                                    <span>#{catalogBean.bidCount(i)} bids · #{fmt.timeLeft(i.endDate)}</span>
+                                </div>
+                            </div>
+                        </h:link>
+                    </ui:repeat>
+                </div>
+            </div>
+        </div>
+    </ui:define>
+</ui:composition>

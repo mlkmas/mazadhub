@@ -1,0 +1,35 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core"
+                xmlns:ui="jakarta.faces.facelets"
+                template="/WEB-INF/templates/layout.xhtml">
+    <f:metadata>
+        <f:viewParam name="id" value="#{sellerResultBean.itemId}"/>
+        <f:viewAction action="#{sellerResultBean.load}"/>
+    </f:metadata>
+    <ui:define name="content">
+        <div class="card result">
+            <h1 class="page" style="text-align:center">Auction result</h1>
+            <p class="muted">#{sellerResultBean.item.title}</p>
+
+            <h:panelGroup rendered="#{sellerResultBean.sold}">
+                <div class="final">#{fmt.money(sellerResultBean.item.currentPrice)}</div>
+                <div class="muted">Final price achieved</div>
+                <div class="winner">
+                    <h2 class="sec">Winning buyer</h2>
+                    <div><strong>Name:</strong> #{sellerResultBean.item.winner.fullName}</div>
+                    <div><strong>Email:</strong> #{sellerResultBean.item.winner.email}</div>
+                    <div><strong>Phone:</strong> #{sellerResultBean.item.winner.phone}</div>
+                    <div><strong>End date:</strong> #{fmt.dateTime(sellerResultBean.item.endDate)}</div>
+                </div>
+            </h:panelGroup>
+
+            <h:panelGroup rendered="#{not sellerResultBean.sold}">
+                <p class="muted" style="margin-top:16px">
+                    This auction is <strong>#{sellerResultBean.item.status}</strong>.
+                    Winner details appear here once the item is sold.
+                </p>
+            </h:panelGroup>
+        </div>
+    </ui:define>
+</ui:composition>
