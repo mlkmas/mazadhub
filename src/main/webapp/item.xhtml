@@ -41,6 +41,7 @@
                         <div class="bidbox">
                             <h2 class="sec">Place a bid</h2>
                             <h:form>
+                                <h:inputHidden value="#{itemDetailBean.itemId}"/>
                                 <div class="bidrow">
                                     <h:inputText value="#{itemDetailBean.bidAmount}"
                                                  a:placeholder="Your bid amount"
@@ -50,6 +51,7 @@
                                 </div>
                             </h:form>
                             <h:form>
+                                <h:inputHidden value="#{itemDetailBean.itemId}"/>
                                 <div class="bidrow">
                                     <h:inputText value="#{itemDetailBean.autoMax}"
                                                  a:placeholder="Automatic bidding — hidden max"
@@ -59,6 +61,7 @@
                                 </div>
                             </h:form>
                             <h:form rendered="#{not empty itemDetailBean.item.buyNowPrice}">
+                                <h:inputHidden value="#{itemDetailBean.itemId}"/>
                                 <h:commandButton styleClass="btn btn-gold"
                                                  style="width:100%"
                                                  value="Buy now · #{fmt.money(itemDetailBean.item.buyNowPrice)}"
@@ -72,20 +75,20 @@
             <h2 class="sec">Bid history</h2>
             <table>
                 <thead>
-                    <tr><th>Amount</th><th>Time</th><th>Type</th></tr>
+                <tr><th>Amount</th><th>Time</th><th>Type</th></tr>
                 </thead>
                 <tbody>
-                    <ui:repeat value="#{itemDetailBean.history}" var="b">
-                        <tr>
-                            <td class="price">#{fmt.money(b.amount)}</td>
-                            <td class="muted">#{fmt.dateTime(b.bidTime)}</td>
-                            <td>
+                <ui:repeat value="#{itemDetailBean.history}" var="b">
+                    <tr>
+                        <td class="price">#{fmt.money(b.amount)}</td>
+                        <td class="muted">#{fmt.dateTime(b.bidTime)}</td>
+                        <td>
                                 <span class="chip #{b.auto ? 'chip-info' : 'chip-gray'}">
                                     #{b.auto ? 'Automatic' : 'Manual'}
                                 </span>
-                            </td>
-                        </tr>
-                    </ui:repeat>
+                        </td>
+                    </tr>
+                </ui:repeat>
                 </tbody>
             </table>
             <h:panelGroup rendered="#{empty itemDetailBean.history}">

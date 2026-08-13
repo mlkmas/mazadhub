@@ -6,22 +6,31 @@ import com.mazadhub.pricing.PriceIncrementRules;
 import com.mazadhub.repository.BidRepository;
 import com.mazadhub.service.BiddingService;
 import com.mazadhub.service.ItemService;
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.faces.view.ViewScoped;
 import jakarta.faces.application.FacesMessage;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
 /**
  * Item details + bid history + the three bidding actions (bid, proxy bid,
- * buy-now). The item id comes from the {@code id} view parameter in the URL.
+ * buy-now).
+ *
+ * <p>This bean is {@code @ViewScoped}: the same instance is kept for as long as
+ * the user stays on the item page, so {@code item} (and {@code itemId}) survive
+ * across form posts. That matters because the bid form is only rendered when
+ * {@code item} is present — with a request-scoped bean the item would be null on
+ * postback and JSF would skip the button action.
  */
 @Named
-@RequestScoped
-public class ItemDetailBean {
+@ViewScoped
+public class ItemDetailBean implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private static final PriceIncrementRules RULES = PriceIncrementRules.defaultRules();
 
@@ -46,7 +55,7 @@ public class ItemDetailBean {
     private BigDecimal bidAmount;
     private BigDecimal autoMax;
 
-    /** f:viewAction target — loads everything for the current id. */
+    /** f:viewAction target on first load; also re-run after each action. */
     public void load() {
         if (itemId == null) {
             return;
@@ -66,11 +75,13 @@ public class ItemDetailBean {
         }
         try {
             bidding.placeBid(itemId, session.getUserId(), bidAmount);
+            bidAmount = null;
             info("Bid placed.");
         } catch (RuntimeException e) {
             error(friendly(e));
         }
-        return reload();
+        load();
+        return null;
     }
 
     public String placeAutoBid() {
@@ -79,11 +90,13 @@ public class ItemDetailBean {
         }
         try {
             bidding.placeAutoBid(itemId, session.getUserId(), autoMax);
+            autoMax = null;
             info("Automatic bidding is set.");
         } catch (RuntimeException e) {
             error(friendly(e));
         }
-        return reload();
+        load();
+        return null;
     }
 
     public String buyNow() {
@@ -96,7 +109,8 @@ public class ItemDetailBean {
         } catch (RuntimeException e) {
             error(friendly(e));
         }
-        return reload();
+        load();
+        return null;
     }
 
     private boolean guardGuest() {
@@ -105,10 +119,6 @@ public class ItemDetailBean {
             return true;
         }
         return false;
-    }
-
-    private String reload() {
-        return "item?faces-redirect=true&id=" + itemId;
     }
 
     private String friendly(RuntimeException e) {
