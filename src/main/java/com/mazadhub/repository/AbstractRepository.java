@@ -15,7 +15,7 @@ import java.util.Optional;
  */
 public abstract class AbstractRepository<T extends Identifiable> {
 
-    @PersistenceContext(unitName = "bidhubPU")
+    @PersistenceContext(unitName = "mazadhubPU")
     protected EntityManager em;
 
     private final Class<T> entityClass;

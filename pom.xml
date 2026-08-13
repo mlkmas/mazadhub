@@ -4,11 +4,11 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.bidhub</groupId>
-    <artifactId>bidhub</artifactId>
+    <groupId>com.mazadhub</groupId>
+    <artifactId>mazadhub</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>BidHub</name>
+    <name>mazadhub</name>
     <description>Electronic auction marketplace</description>
 
     <properties>
@@ -54,7 +54,7 @@
     </dependencies>
 
     <build>
-        <finalName>bidhub</finalName>
+        <finalName>mazadhub</finalName>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

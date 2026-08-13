@@ -1,4 +1,4 @@
-# BidHub — Electronic Auction Marketplace
+# mazadhub — Electronic Auction Marketplace
 
 A Jakarta EE web application implementing an online auction (eBay-style),
 built for the Java software-engineering course project.
@@ -49,8 +49,8 @@ JPA entities (Jakarta Persistence 3.x) mapped to the ERD, plus repositories:
 | `repository/BidRepository` | bid history, count |
 | `repository/AutoBidRepository` | active proxy bids per item |
 
-Config: `src/main/resources/META-INF/persistence.xml` (JTA unit `bidhubPU`,
-data source `jdbc/bidhub`, MySQL).
+Config: `src/main/resources/META-INF/persistence.xml` (JTA unit `mazadhubPU`,
+data source `jdbc/mazadhub`, MySQL).
 
 > Concurrency: money is `BigDecimal`; concurrent bids on the same item are made
 > safe by the item `@Version` field (optimistic) and `findByIdForUpdate`
@@ -83,7 +83,7 @@ too-low / closed-auction rejections).
 
 ```bash
 mvn test          # run the unit tests
-mvn package       # build the deployable WAR (target/bidhub.war)
+mvn package       # build the deployable WAR (target/mazadhub.war)
 ```
 
 > The first `mvn` run downloads dependencies from Maven Central.
