@@ -92,10 +92,10 @@ public final class PriceIncrementRules
     }
 
     /**
-     * Returns the smallest amount a new bid must reach to be valid, i.e.
-     * {@code currentPrice + minIncrement(currentPrice)}.
+     * Returns the smallest amount a new bid must reach to be valid
      */
-    public BigDecimal minNextBid(BigDecimal currentPrice) {
+    public BigDecimal minNextBid(BigDecimal currentPrice)
+    {
         return currentPrice.add(minIncrement(currentPrice));
     }
 }
