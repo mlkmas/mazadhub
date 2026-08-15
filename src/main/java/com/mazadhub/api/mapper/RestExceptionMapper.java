@@ -6,6 +6,7 @@ import com.mazadhub.exception.AuctionClosedException;
 import com.mazadhub.exception.BidTooLowException;
 import com.mazadhub.exception.BuyNowNotAvailableException;
 import com.mazadhub.exception.InvalidCredentialsException;
+import com.mazadhub.exception.SellerCannotBidException;
 import com.mazadhub.exception.ItemNotFoundException;
 import com.mazadhub.exception.UserAlreadyExistsException;
 import com.mazadhub.exception.UserNotFoundException;
@@ -52,6 +53,7 @@ public class RestExceptionMapper implements ExceptionMapper<RuntimeException> {
             return new Status(401, "unauthorized");
         }
         if (ex instanceof AlreadyHighestBidderException
+                || ex instanceof SellerCannotBidException
                 || ex instanceof BidTooLowException
                 || ex instanceof AuctionClosedException
                 || ex instanceof BuyNowNotAvailableException

@@ -11,6 +11,7 @@ import com.mazadhub.domain.Item;
 import com.mazadhub.domain.ItemStatus;
 import com.mazadhub.domain.User;
 import com.mazadhub.exception.AlreadyHighestBidderException;
+import com.mazadhub.exception.SellerCannotBidException;
 import com.mazadhub.exception.AuctionClosedException;
 import com.mazadhub.exception.BuyNowNotAvailableException;
 import com.mazadhub.exception.ItemNotFoundException;
@@ -97,6 +98,11 @@ public class BiddingService {
                 .orElseThrow(() -> new UserNotFoundException(bidderId));
         Instant now = now();
 
+        // A seller cannot bid on their own auction.
+        if (item.getSeller() != null && item.getSeller().getId().equals(bidder.getId())) {
+            throw new SellerCannotBidException(itemId);
+        }
+
         // You can't outbid yourself: reject if you're already the highest bidder.
         if (item.getWinner() != null && item.getWinner().getId().equals(bidder.getId())) {
             throw new AlreadyHighestBidderException(itemId);
@@ -173,6 +179,11 @@ public class BiddingService {
         User bidder = users.findById(bidderId)
                 .orElseThrow(() -> new UserNotFoundException(bidderId));
         Instant now = now();
+
+        // A seller cannot buy their own item.
+        if (item.getSeller() != null && item.getSeller().getId().equals(bidder.getId())) {
+            throw new SellerCannotBidException(itemId);
+        }
 
         if (item.getStatus() != ItemStatus.ACTIVE || !now.isBefore(item.getEndDate())) {
             throw new AuctionClosedException("Auction is not open for buy-now (item " + itemId + ")");
