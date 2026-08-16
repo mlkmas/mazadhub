@@ -1,15 +1,19 @@
 /*
- * Live price updates for the item page.
+ * Live update for the item page.
  *
- * Polls the lightweight /api/live/{itemId} endpoint every few seconds and
- * refreshes the displayed price, bid count and status without a manual reload.
+ * Polls the lightweight /api/live/{itemId} endpoint every few seconds. While
+ * nothing has changed it simply keeps the displayed price in step. As soon as
+ * the server reports a DIFFERENT price or status — someone else bid, or the
+ * auction closed — the page is reloaded so that every part of it is refreshed
+ * together: the current price, the next minimum bid, the bid history, the
+ * status and the available actions.
  *
- * Two things matter for correctness here:
- *  - the request must NOT be served from the browser cache, or the page would
- *    keep re-displaying the price it already had (a cached response still
- *    reports HTTP 200, which makes this failure look like success);
- *  - the poll keeps running even if one request fails, so a brief network
- *    hiccup does not stop the updates permanently.
+ * Reloading (rather than patching each element in JavaScript) keeps JSF as the
+ * single source of truth, so the view can never drift out of step with the
+ * server.
+ *
+ * Note: the request must not be served from the browser cache — a cached copy
+ * still reports HTTP 200, which would silently freeze the page.
  */
 (function () {
     "use strict";
@@ -23,10 +27,12 @@
     }
 
     var itemId = priceEl.getAttribute("data-item-id");
-    var countEl = document.getElementById("liveBidCount");
-    var statusEl = document.getElementById("liveStatus");
     var base = priceEl.getAttribute("data-api-base") || "";
-    var lastPrice = null;
+
+    // Baseline: what the server rendered into this page.
+    var knownPrice = null;
+    var knownStatus = null;
+    var reloading = false;
 
     function log() {
         if (DEBUG && window.console) {
@@ -35,23 +41,17 @@
     }
 
     function refresh() {
-        // Cache-buster in the URL AND no-store, so we always read the server's
-        // current value rather than a cached copy.
+        if (reloading) {
+            return;
+        }
         var url = base + "/api/live/" + itemId + "?t=" + Date.now();
 
         fetch(url, {
             cache: "no-store",
-            headers: {
-                "Accept": "application/json",
-                "Cache-Control": "no-cache"
-            }
+            headers: { "Accept": "application/json", "Cache-Control": "no-cache" }
         })
             .then(function (response) {
-                if (!response.ok) {
-                    log("HTTP", response.status);
-                    return null;
-                }
-                return response.json();
+                return response.ok ? response.json() : null;
             })
             .then(function (data) {
                 if (!data) {
@@ -59,30 +59,33 @@
                 }
                 log("received", data);
 
-                var priceText = Number(data.price).toLocaleString() + " ILS";
+                var price = String(data.price);
+                var status = String(data.status);
 
-                if (lastPrice !== null && String(data.price) !== String(lastPrice)) {
-                    log("price changed", lastPrice, "->", data.price);
-                    priceEl.classList.remove("price-flash");
-                    void priceEl.offsetWidth;          // restart the CSS animation
+                // First poll establishes the baseline for this page load.
+                if (knownPrice === null) {
+                    knownPrice = price;
+                    knownStatus = status;
+                    priceEl.textContent = Number(price).toLocaleString() + " ILS";
+                    return;
+                }
+
+                if (price !== knownPrice || status !== knownStatus) {
+                    log("changed", knownPrice, "->", price, "| reloading");
+                    reloading = true;
+
+                    // Show the new price immediately, flash it, then reload so
+                    // the minimum, history and actions all refresh together.
+                    priceEl.textContent = Number(price).toLocaleString() + " ILS";
                     priceEl.classList.add("price-flash");
+
                     setTimeout(function () {
-                        priceEl.classList.remove("price-flash");
-                    }, 1200);
-                }
-
-                lastPrice = data.price;
-                priceEl.textContent = priceText;
-
-                if (countEl) {
-                    countEl.textContent = data.bidCount + " bids";
-                }
-                if (statusEl) {
-                    statusEl.textContent = "Status: " + data.status;
+                        window.location.reload();
+                    }, 900);
                 }
             })
             .catch(function (error) {
-                log("request failed", error);          // keep polling regardless
+                log("request failed", error);        // keep polling regardless
             });
     }
 
