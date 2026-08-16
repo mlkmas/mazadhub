@@ -10,7 +10,9 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import java.util.Map;
 
@@ -35,12 +37,21 @@ public class LivePriceResource {
     @GET
     @Path("{itemId}")
     @Transactional
-    public Map<String, Object> live(@PathParam("itemId") long itemId) {
+    public Response live(@PathParam("itemId") long itemId) {
         Item item = items.getById(itemId);
-        return Map.of(
+        Map<String, Object> body = Map.of(
                 "itemId", item.getId(),
                 "price", item.getCurrentPrice().toPlainString(),
                 "bidCount", bids.countByItem(item),
                 "status", item.getStatus().name());
+
+        // Must never be cached: a cached copy would freeze the displayed price
+        // while still reporting HTTP 200.
+        CacheControl noCache = new CacheControl();
+        noCache.setNoCache(true);
+        noCache.setNoStore(true);
+        noCache.setMustRevalidate(true);
+
+        return Response.ok(body).cacheControl(noCache).build();
     }
 }
