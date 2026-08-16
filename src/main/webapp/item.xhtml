@@ -22,14 +22,16 @@
                     <h1 class="page">#{itemDetailBean.item.title}</h1>
                     <div class="meta-line">
                         <span>Category: #{itemDetailBean.item.category.name}</span>
-                        <span>#{itemDetailBean.bidCount} bids</span>
+                        <span id="liveBidCount">#{itemDetailBean.bidCount} bids</span>
                         <span>Ends in #{fmt.timeLeft(itemDetailBean.item.endDate)}</span>
-                        <span>Status: #{itemDetailBean.item.status}</span>
+                        <span id="liveStatus">Status: #{itemDetailBean.item.status}</span>
                     </div>
 
                     <div class="price-band">
                         <div class="muted">Current price</div>
-                        <div class="price big">#{fmt.money(itemDetailBean.item.currentPrice)}</div>
+                        <div class="price big" id="livePrice"
+                             data-item-id="#{itemDetailBean.item.id}"
+                             data-api-base="#{request.contextPath}">#{fmt.money(itemDetailBean.item.currentPrice)}</div>
                         <div class="muted">Next minimum bid: #{fmt.money(itemDetailBean.minNextBid)}</div>
                     </div>
 
@@ -95,5 +97,6 @@
                 <p class="muted">No bids yet.</p>
             </h:panelGroup>
         </h:panelGroup>
+        <h:outputScript library="js" name="live-price.js" target="body"/>
     </ui:define>
 </ui:composition>
