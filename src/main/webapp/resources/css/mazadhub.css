@@ -1,10 +1,33 @@
+/* ============================================================
+   mazadHub — Ocean Blue theme
+   ------------------------------------------------------------
+   Base: the deep-blue ramp (#03045e -> #caf0f8).
+   Accent: a warm amber for prices and "Buy now", because an
+   all-blue page would let the most important numbers disappear.
+   Status chips borrow the pastel tones (celadon / powder petal).
+   ============================================================ */
 :root{
-  --ink:#0f2e3a; --brand:#124559; --brand2:#1b6e8c;
-  --gold:#c9791a; --gold-soft:#fbf1de;
-  --go:#1f8a54; --go-dark:#186e43;
-  --bg:#e9eef1; --card:#ffffff; --line:#d8e0e4; --muted:#6b7c84;
-  --danger:#c0392b; --chip:#eef4f6;
+  /* --- the blue ramp --- */
+  --twilight:#03045e; --french-blue:#023e8a; --teal-blue:#0077b6;
+  --blue-green:#0096c7; --turquoise:#00b4d8; --sky-aqua:#48cae4;
+  --frosted:#90e0ef;   --frosted-2:#ade8f4; --light-cyan:#caf0f8;
+
+  /* --- roles used across the pages --- */
+  --ink:#03045e;          /* body text: deep twilight            */
+  --brand:#023e8a;        /* top bar, table headers              */
+  --brand2:#0077b6;       /* links, secondary headings           */
+  --gold: #059669;         /* rich emerald for prices and buttons */
+  --gold-soft: #d1fae5;    /* very light mint background */    /* price band background               */
+  --go:#0077b6;           /* primary buttons                     */
+  --go-dark:#023e8a;      /* primary button hover                */
+  --bg:#ffffff;           /* page background (soft light cyan)   */
+  --card:#ade8f4;
+  --line:#cfe7f0;         /* borders                             */
+  --muted:#4e6f80;        /* secondary text                      */
+  --danger:#c0392b;
+  --chip:#e4f2f8;
 }
+
 *{box-sizing:border-box;}
 body{margin:0; background:var(--bg); color:var(--ink);
   font-family:system-ui,"Segoe UI","Helvetica Neue",Arial,sans-serif; line-height:1.5;}
@@ -94,3 +117,34 @@ tr:last-child td{border-bottom:none;}
 
 .price-flash { animation: flash 1.2s ease-out; }
 @keyframes flash { 0% { background:#fbead0; } 100% { background:transparent; } }
+/* ---------- status chips (pastel accents) ---------- */
+.chip-go   { background:#b9fbc0; color:#14663f; }   /* celadon      — leading / won */
+.chip-warn { background:#fde4cf; color:#8a4b12; }   /* powder petal — outbid        */
+.chip-info { background:#ade8f4; color:#024f74; }   /* frosted blue — active        */
+.chip-gray { background:#e2eef3; color:#4a6470; }   /* neutral                      */
+
+/* ---------- header / nav on the deep blue bar ---------- */
+.topbar{ background:linear-gradient(90deg, var(--twilight), var(--french-blue)); }
+.logo span{ color:var(--sky-aqua); }
+.nav a{ color:rgba(255,255,255,.88); }
+.nav .me{ color:#fff; }
+
+/* ---------- price emphasis ---------- */
+.price{ color:var(--gold); }
+.price-band{ background:var(--gold-soft); border-color:#f3ddc0; }
+
+/* ---------- live price update flash ---------- */
+.price-flash{ animation: priceFlash 1.2s ease-out; border-radius:8px; }
+@keyframes priceFlash{
+  0%   { background: var(--frosted-2); }
+  100% { background: transparent; }
+}
+
+/* ---------- small polish ---------- */
+.tile{ transition: box-shadow .15s ease, transform .15s ease; }
+.tile:hover{ transform: translateY(-2px); box-shadow:0 8px 20px rgba(2,62,138,.12); }
+.thumb{ background:linear-gradient(135deg, var(--light-cyan), var(--frosted)); }
+.side a:hover{ background:var(--light-cyan); }
+.btn{ transition: filter .15s ease; }
+.btn-gold{ background:var(--gold); }
+th{ background:var(--french-blue); }
