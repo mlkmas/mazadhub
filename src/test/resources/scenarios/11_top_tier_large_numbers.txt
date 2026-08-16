@@ -1,0 +1,10 @@
+# Very large amounts stay in the open-ended top tier (increment 100).
+START 20000
+AUTO alice 900000
+EXPECT 20000 alice
+BID bob 500000
+EXPECT 500100 alice
+BID bob 800000
+EXPECT 800100 alice
+BID bob 1000000
+EXPECT 900100 bob

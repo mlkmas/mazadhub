@@ -1,0 +1,13 @@
+# The increment changes as the price crosses ladder tiers.
+# <=100 -> 5 | <=1000 -> 10 | <=10000 -> 50 | above -> 100
+START 10
+AUTO alice 100000
+EXPECT 10 alice
+BID bob 90
+EXPECT 95 alice
+BID bob 500
+EXPECT 510 alice
+BID bob 5000
+EXPECT 5050 alice
+BID bob 50000
+EXPECT 50100 alice

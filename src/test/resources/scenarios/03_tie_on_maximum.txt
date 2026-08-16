@@ -1,0 +1,7 @@
+# Equal maximums: the price becomes that maximum and the EARLIEST
+# bidder keeps the lead. This is why a round-number bid can look
+# like the proxy "jumped" straight to its ceiling.
+START 100
+AUTO alice 5000
+BID bob 5000
+EXPECT 5000 alice

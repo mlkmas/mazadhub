@@ -1,0 +1,6 @@
+# Money is handled with exact decimals, never floating point.
+START 100.50
+BID alice 200.75
+EXPECT 100.50 alice
+BID bob 300.25
+EXPECT 210.75 bob

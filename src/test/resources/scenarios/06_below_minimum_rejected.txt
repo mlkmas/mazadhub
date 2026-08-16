@@ -1,0 +1,11 @@
+# Any amount below the required minimum next bid is refused,
+# and the auction state is left untouched.
+START 100
+REJECT alice 0
+REJECT alice 1
+REJECT alice 99
+REJECT alice 100
+REJECT alice 104
+EXPECT 100 none
+BID alice 105
+EXPECT 100 alice

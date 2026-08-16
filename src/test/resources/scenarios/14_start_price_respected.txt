@@ -1,0 +1,7 @@
+# A lone bidder always leads at the STARTING price, never at their
+# own maximum: nobody has pushed them up yet.
+START 750
+AUTO alice 99999
+EXPECT 750 alice
+BID bob 800
+EXPECT 810 alice

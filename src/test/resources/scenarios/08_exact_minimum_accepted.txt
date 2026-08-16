@@ -1,0 +1,6 @@
+# Bidding exactly the minimum is always allowed (boundary case).
+START 340
+BID alice 350
+EXPECT 340 alice
+BID bob 360
+EXPECT 360 bob

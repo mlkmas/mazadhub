@@ -1,0 +1,8 @@
+# A challenger who only just clears the minimum is countered
+# immediately by the standing proxy.
+START 100
+AUTO alice 2000
+BID bob 105
+EXPECT 115 alice
+BID bob 200
+EXPECT 210 alice

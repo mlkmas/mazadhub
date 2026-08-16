@@ -1,0 +1,12 @@
+# A long exchange in the cheapest tier, where the increment is 5.
+START 10
+BID alice 20
+EXPECT 10 alice
+BID bob 25
+EXPECT 25 bob
+BID alice 30
+EXPECT 30 alice
+BID bob 35
+EXPECT 35 bob
+BID alice 40
+EXPECT 40 alice

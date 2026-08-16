@@ -1,0 +1,10 @@
+# The lead moves back and forth as maximums are exhausted.
+START 50
+BID alice 200
+EXPECT 50 alice
+BID bob 300
+EXPECT 210 bob
+AUTO alice 1000
+EXPECT 310 alice
+BID bob 1200
+EXPECT 1010 bob

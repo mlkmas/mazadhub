@@ -1,0 +1,12 @@
+# A hidden maximum defends itself one increment at a time.
+# Commands: START <price> | BID <user> <amount> | AUTO <user> <max>
+#           EXPECT <price> <leader> | REJECT <user> <amount>
+START 100
+AUTO alice 30000
+EXPECT 100 alice
+BID bob 20000
+EXPECT 20100 alice
+BID bob 25000
+EXPECT 25100 alice
+BID bob 35000
+EXPECT 30100 bob

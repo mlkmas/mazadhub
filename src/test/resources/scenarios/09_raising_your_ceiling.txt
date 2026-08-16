@@ -1,0 +1,9 @@
+# A losing bidder may raise their hidden ceiling to retake the lead.
+START 100
+AUTO alice 1000
+BID bob 500
+EXPECT 510 alice
+AUTO bob 3000
+EXPECT 1010 bob
+AUTO alice 5000
+EXPECT 3050 alice

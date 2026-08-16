@@ -1,0 +1,11 @@
+# While you are already the leader you may not bid again.
+# Once someone else takes the lead, you may bid once more.
+START 100
+BID alice 500
+EXPECT 100 alice
+REJECT alice 600
+REJECT alice 10000
+BID bob 700
+EXPECT 510 bob
+BID alice 2000
+EXPECT 710 alice

@@ -1,0 +1,13 @@
+# A crowded auction: five people, mixed manual and automatic.
+START 100
+AUTO alice 5000
+BID bob 200
+EXPECT 210 alice
+BID carol 1000
+EXPECT 1010 alice
+AUTO dave 3000
+EXPECT 3050 alice
+BID erin 4000
+EXPECT 4050 alice
+BID erin 6000
+EXPECT 5050 erin

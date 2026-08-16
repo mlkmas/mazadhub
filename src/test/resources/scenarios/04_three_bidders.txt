@@ -1,0 +1,11 @@
+# Three participants; the highest hidden maximum prevails.
+START 100
+AUTO alice 1000
+BID bob 400
+EXPECT 410 alice
+AUTO carol 2000
+EXPECT 1010 carol
+BID bob 1500
+EXPECT 1550 carol
+BID bob 2500
+EXPECT 2050 bob
