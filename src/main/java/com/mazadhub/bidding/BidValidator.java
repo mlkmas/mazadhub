@@ -8,51 +8,48 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-/**
- * Validates whether a proposed bid amount is acceptable for a given auction
- */
+// Decides whether a proposed amount is a legal bid on an auction
 public final class BidValidator
 {
-
     private final PriceIncrementRules rules;
 
+    // Validates against the given price-step table
     public BidValidator(PriceIncrementRules rules)
     {
-        this.rules = Objects.requireNonNull(rules, "rules");
+        this.rules=Objects.requireNonNull(rules, "rules");
     }
 
-    /**
-     * @param snapshot current auction state
-     * @param amount   the proposed bid amount
-     * @param now      the moment the bid is evaluated
-     * @throws AuctionClosedException if the auction is not open for bidding
-     * @throws BidTooLowException     if the amount is below the minimum next bid
-     */
-    public void validate(AuctionSnapshot snapshot, BigDecimal amount, Instant now) {
+    // Throws if the auction is closed, or if the amount is under the minimum next bid
+    public void validate(AuctionSnapshot snapshot, BigDecimal amount, Instant now)
+    {
         Objects.requireNonNull(snapshot, "snapshot");
         Objects.requireNonNull(amount, "amount");
         Objects.requireNonNull(now, "now");
 
-        if (!snapshot.isOpenAt(now)) {
+        if(!snapshot.isOpenAt(now))
+        {
             throw new AuctionClosedException(
-                    "Auction is not open for bidding (status=" + snapshot.status()
-                            + ", endTime=" + snapshot.endTime() + ")");
+                    "Auction is not open for bidding (status="+snapshot.status()
+                            +", endTime="+snapshot.endTime()+")");
         }
-        BigDecimal minNext = rules.minNextBid(snapshot.currentPrice());
-        if (amount.compareTo(minNext) < 0) {
+
+        BigDecimal minNext=rules.minNextBid(snapshot.currentPrice());
+        if(amount.compareTo(minNext)<0)
+        {
             throw new BidTooLowException(amount, minNext);
         }
     }
 
-
+    // Same check as validate(), but answers true/false instead of throwing
     public boolean isValid(AuctionSnapshot snapshot, BigDecimal amount, Instant now)
     {
-        try {
+        try
+        {
             validate(snapshot, amount, now);
             return true;
-        } catch (AuctionClosedException | BidTooLowException e)
+        }
+        catch(AuctionClosedException|BidTooLowException e)
         {
-
             return false;
         }
     }

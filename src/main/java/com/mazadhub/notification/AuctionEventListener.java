@@ -8,37 +8,44 @@ import jakarta.jms.TextMessage;
 
 import java.util.logging.Logger;
 
-/**
- * Message-driven bean subscribing to the auction topic. It demonstrates the
- * consuming half of the publish/subscribe flow and gives a server-side record of
- * every event; the browser-facing live updates are served by
- * {@code LivePriceResource}.
- */
-@MessageDriven(activationConfig = {
-        @ActivationConfigProperty(propertyName = "destinationLookup",
-                                  propertyValue = "jms/auctionTopic"),
-        @ActivationConfigProperty(propertyName = "destinationType",
-                                  propertyValue = "jakarta.jms.Topic")
+// Message-driven bean subscribing to the auction topic
+@MessageDriven(activationConfig={
+        @ActivationConfigProperty(propertyName="destinationLookup",
+                                  propertyValue="jms/auctionTopic"),
+        @ActivationConfigProperty(propertyName="destinationType",
+                                  propertyValue="jakarta.jms.Topic")
 })
-public class AuctionEventListener implements MessageListener {
+// Message-driven bean that subscribes to the auction topic and logs what arrives, proving the JMS round trip works
+public class AuctionEventListener implements MessageListener
+{
+    private static final Logger LOG=Logger.getLogger(AuctionEventListener.class.getName());
 
-    private static final Logger LOG = Logger.getLogger(AuctionEventListener.class.getName());
-
+    // Called by the container for every message on the topic
     @Override
-    public void onMessage(Message message) {
-        try {
-            if (message instanceof TextMessage text) {
-                LOG.info(() -> "Auction event received: " + safeBody(text));
+    public void onMessage(Message message)
+    {
+        try
+        {
+            if(message instanceof TextMessage text)
+            {
+                LOG.info(()->"Auction event received: "+safeBody(text));
             }
-        } catch (RuntimeException e) {
-            LOG.warning("Could not handle auction event: " + e.getMessage());
+        }
+        catch(RuntimeException e)
+        {
+            LOG.warning("Could not handle auction event: "+e.getMessage());
         }
     }
 
-    private String safeBody(TextMessage text) {
-        try {
+    // Reads the message text without letting a JMS error escape
+    private String safeBody(TextMessage text)
+    {
+        try
+        {
             return text.getText();
-        } catch (Exception e) {
+        }
+        catch(Exception e)
+        {
             return "<unreadable>";
         }
     }

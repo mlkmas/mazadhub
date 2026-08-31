@@ -1,12 +1,10 @@
 package com.mazadhub.domain;
 
-/**
- * Authorization role
- * USER  –user:can buy and sell items.
- * ADMIN –the auction manager:can manage categories, users and monitor auctions.
- */
+// What a signed-in account is allowed to do
 public enum UserRole
 {
+    // browses, sells items and places bids
     USER,
+    // also manages categories and other users
     ADMIN
 }

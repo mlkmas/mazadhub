@@ -1,13 +1,12 @@
 package com.mazadhub.domain;
 
-/**
- * ACTIVE–auction is running and accepting bids.
- * SOLD– auction ended with a winning bid.
- * CLOSED–auction ended with no winner(no bids,or cancelled).
- */
+// Lifecycle state of an auction item
 public enum ItemStatus
 {
+    // the auction is running and accepting bids
     ACTIVE,
+    // the auction ended with a winner, or was taken with buy-now
     SOLD,
+    // the auction ended without a single bid
     CLOSED
 }

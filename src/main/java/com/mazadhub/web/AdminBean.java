@@ -18,11 +18,12 @@ import jakarta.transaction.Transactional;
 
 import java.util.List;
 
-/** Admin dashboard: manage categories, view users, watch active auctions. */
+// Admin dashboard: categories, users and the list of running auctions
 @Named
 @RequestScoped
-public class AdminBean {
-
+public class AdminBean
+{
+    // services, repositories and queries the dashboard reads through
     @Inject
     private ItemService items;
 
@@ -45,66 +46,112 @@ public class AdminBean {
     private String newCategoryName;
     private String newCategoryDescription;
 
+    // Fills the three tables when the bean is created
     @PostConstruct
-    public void init() {
+    public void init()
+    {
         refresh();
     }
 
-    /** Redirect non-admins away before the page renders. */
-    public String guard() {
-        return session.isAdmin() ? null : "catalog?faces-redirect=true";
+    // Sends anyone who is not an admin back to the catalogue
+    public String guard()
+    {
+        return session.isAdmin()?null:"catalog?faces-redirect=true";
     }
 
-    private void refresh() {
-        categoryList = items.listCategories();
-        users = queries.allUsers();
-        activeAuctions = queries.allActiveItems();
+    // Re-reads the three tables after a change
+    private void refresh()
+    {
+        categoryList=items.listCategories();
+        users=queries.allUsers();
+        activeAuctions=queries.allActiveItems();
     }
 
-    public long itemsIn(Category c) {
+    // How many items sit in one category
+    public long itemsIn(Category c)
+    {
         return queries.itemCountByCategory(c.getId());
     }
 
+    // Adds the typed category, refusing an empty name
     @Transactional
-    public void addCategory() {
-        if (newCategoryName == null || newCategoryName.isBlank()) {
+    public void addCategory()
+    {
+        if(newCategoryName==null||newCategoryName.isBlank())
+        {
             error("Category name is required.");
             return;
         }
+
         categories.save(new Category(newCategoryName.trim(),
-                newCategoryDescription == null ? "" : newCategoryDescription.trim()));
-        newCategoryName = null;
-        newCategoryDescription = null;
+                newCategoryDescription==null?"":newCategoryDescription.trim()));
+        newCategoryName=null;
+        newCategoryDescription=null;
         refresh();
         info("Category added.");
     }
 
+    // Gives another user the admin role
     @Transactional
-    public void promoteToAdmin(User u) {
-        User managed = userRepo.findById(u.getId()).orElse(null);
-        if (managed != null) {
+    public void promoteToAdmin(User u)
+    {
+        User managed=userRepo.findById(u.getId()).orElse(null);
+        if(managed!=null)
+        {
             managed.setRole(UserRole.ADMIN);
             userRepo.save(managed);
             refresh();
-            info(u.getUsername() + " is now an admin.");
+            info(u.getUsername()+" is now an admin.");
         }
     }
 
-    private void info(String m) {
+    // Shows a green message on the page
+    private void info(String m)
+    {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_INFO, m, null));
     }
 
-    private void error(String m) {
+    // Shows a red message on the page
+    private void error(String m)
+    {
         FacesContext.getCurrentInstance().addMessage(null,
                 new FacesMessage(FacesMessage.SEVERITY_ERROR, m, null));
     }
 
-    public List<Category> getCategoryList() { return categoryList; }
-    public List<User> getUsers() { return users; }
-    public List<Item> getActiveAuctions() { return activeAuctions; }
-    public String getNewCategoryName() { return newCategoryName; }
-    public void setNewCategoryName(String v) { this.newCategoryName = v; }
-    public String getNewCategoryDescription() { return newCategoryDescription; }
-    public void setNewCategoryDescription(String v) { this.newCategoryDescription = v; }
+    // getters / setters used by the JSF pages and services
+    public List<Category> getCategoryList()
+    {
+        return categoryList;
+    }
+
+    public List<User> getUsers()
+    {
+        return users;
+    }
+
+    public List<Item> getActiveAuctions()
+    {
+        return activeAuctions;
+    }
+
+    public String getNewCategoryName()
+    {
+        return newCategoryName;
+    }
+
+    public void setNewCategoryName(String v)
+    {
+        this.newCategoryName=v;
+    }
+
+    public String getNewCategoryDescription()
+    {
+        return newCategoryDescription;
+    }
+
+    public void setNewCategoryDescription(String v)
+    {
+        this.newCategoryDescription=v;
+    }
 }

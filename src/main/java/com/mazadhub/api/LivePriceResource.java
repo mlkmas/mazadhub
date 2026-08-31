@@ -16,30 +16,27 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.Map;
 
-/**
- * Tiny endpoint the item page polls for live price updates:
- * {@code GET /api/live/{itemId}} → current price, bid count and status.
- *
- * <p>Kept separate from {@link ItemResource} because it is called frequently and
- * returns the smallest possible payload.
- */
+// Small endpoint the item page polls to keep the price on screen up to date
 @Path("live")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
-public class LivePriceResource {
-
+public class LivePriceResource
+{
+    // services used to read the current state of the item
     @Inject
     private ItemService items;
 
     @Inject
     private BidRepository bids;
 
+    // GET /api/live/{itemId} - current price, bid count and status, with caching switched off
     @GET
     @Path("{itemId}")
     @Transactional
-    public Response live(@PathParam("itemId") long itemId) {
-        Item item = items.getById(itemId);
-        Map<String, Object> body = Map.of(
+    public Response live(@PathParam("itemId") long itemId)
+    {
+        Item item=items.getById(itemId);
+        Map<String, Object> body=Map.of(
                 "itemId", item.getId(),
                 "price", item.getCurrentPrice().toPlainString(),
                 "bidCount", bids.countByItem(item),
@@ -47,7 +44,7 @@ public class LivePriceResource {
 
         // Must never be cached: a cached copy would freeze the displayed price
         // while still reporting HTTP 200.
-        CacheControl noCache = new CacheControl();
+        CacheControl noCache=new CacheControl();
         noCache.setNoCache(true);
         noCache.setNoStore(true);
         noCache.setMustRevalidate(true);

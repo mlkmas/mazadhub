@@ -12,26 +12,31 @@ import jakarta.ws.rs.core.MediaType;
 
 import java.util.List;
 
-/** Read-only catalogue of categories. */
+// REST endpoint listing the catalogue categories
 @Path("categories")
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
-public class CategoryResource {
-
+public class CategoryResource
+{
     private ItemService items;
 
-    protected CategoryResource() {
-        // for the CDI proxy
+    // CDI needs a no-argument constructor
+    protected CategoryResource()
+    {
     }
 
+    // The item service is injected by the container
     @Inject
-    public CategoryResource(ItemService items) {
-        this.items = items;
+    public CategoryResource(ItemService items)
+    {
+        this.items=items;
     }
 
+    // GET /api/categories - every category
     @GET
     @Transactional
-    public List<CategoryDTO> list() {
+    public List<CategoryDTO> list()
+    {
         return items.listCategories().stream().map(CategoryDTO::from).toList();
     }
 }

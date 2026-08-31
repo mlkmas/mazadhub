@@ -5,17 +5,19 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
 
-/**
- * Data-access operations for {@link Category}.
- */
+// Data-access operations for Category
 @ApplicationScoped
-public class CategoryRepository extends AbstractRepository<Category> {
-
-    public CategoryRepository() {
+public class CategoryRepository extends AbstractRepository<Category>
+{
+    // Tells the base class which entity this repository manages
+    public CategoryRepository()
+    {
         super(Category.class);
     }
 
-    public List<Category> findAll() {
+    // Every category, in alphabetical order
+    public List<Category> findAll()
+    {
         return em.createQuery("SELECT c FROM Category c ORDER BY c.name", Category.class)
                 .getResultList();
     }

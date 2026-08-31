@@ -10,54 +10,51 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
-/**
- * Registration and authentication of users. Passwords are hashed before storage
- * and never persisted in clear text.
- */
+// Registration and login
 @ApplicationScoped
-public class UserService {
-
+public class UserService
+{
     private UserRepository users;
 
-    protected UserService() {
-        // for the CDI proxy
+    // CDI needs a no-argument constructor
+    protected UserService()
+    {
     }
 
+    // The user repository is injected by the container
     @Inject
-    public UserService(UserRepository users) {
-        this.users = users;
+    public UserService(UserRepository users)
+    {
+        this.users=users;
     }
 
-    /**
-     * Registers a new end user.
-     *
-     * @throws UserAlreadyExistsException if the username is taken
-     */
+    // Creates an account with a hashed password, refusing a name that is taken
     @Transactional
     public User register(String username, String rawPassword,
-                         String fullName, String email, String phone) {
-        if (users.existsByUsername(username)) {
+                         String fullName, String email, String phone)
+    {
+        if(users.existsByUsername(username))
+        {
             throw new UserAlreadyExistsException(username);
         }
-        User user = new User(username, PasswordHasher.hash(rawPassword), UserRole.USER);
+
+        User user=new User(username, PasswordHasher.hash(rawPassword), UserRole.USER);
         user.setFullName(fullName);
         user.setEmail(email);
         user.setPhone(phone);
         return users.save(user);
     }
 
-    /**
-     * Authenticates a user by username and password.
-     *
-     * @return the authenticated user
-     * @throws InvalidCredentialsException if the user is unknown or the password is wrong
-     */
-    public User login(String username, String rawPassword) {
-        User user = users.findByUsername(username)
+    // Checks the password and returns the user, or throws InvalidCredentialsException
+    public User login(String username, String rawPassword)
+    {
+        User user=users.findByUsername(username)
                 .orElseThrow(InvalidCredentialsException::new);
-        if (!PasswordHasher.verify(rawPassword, user.getPasswordHash())) {
+        if(!PasswordHasher.verify(rawPassword, user.getPasswordHash()))
+        {
             throw new InvalidCredentialsException();
         }
+
         return user;
     }
 }

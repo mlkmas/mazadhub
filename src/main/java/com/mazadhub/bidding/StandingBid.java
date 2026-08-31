@@ -1,25 +1,20 @@
 package com.mazadhub.bidding;
 
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-/**
- * the maximum amount they are willing to
- * pay, and when they committed it. A plain manual bid is modelled as a standing
- * bid whose maximum equals the bid amount, so manual and automatic (proxy) bids
- * are resolved by the same engine.
- */
+// One bidder's standing commitment: the most they will pay, and when they committed it
 public record StandingBid(long bidderId, BigDecimal maxAmount, Instant placedAt)
 {
+    // Compact constructor, the maximum must be positive
     public StandingBid
     {
         Objects.requireNonNull(maxAmount, "maxAmount");
         Objects.requireNonNull(placedAt, "placedAt");
-        if (maxAmount.signum() <= 0)
+        if(maxAmount.signum()<=0)
         {
-            throw new IllegalArgumentException("maxAmount must be positive: " + maxAmount);
+            throw new IllegalArgumentException("maxAmount must be positive: "+maxAmount);
         }
     }
 }

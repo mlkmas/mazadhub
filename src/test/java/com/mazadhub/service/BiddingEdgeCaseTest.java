@@ -23,13 +23,10 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * Boundary and failure cases: amounts on and around the minimum, closed and
- * expired auctions, buy-now rules, and unknown ids.
- */
-class BiddingEdgeCaseTest {
-
-    private static final Instant NOW = Instant.parse("2026-06-11T12:00:00Z");
+// Boundary and failure cases: amounts around the minimum, closed and expired auctions, buy-now and unknown ids
+class BiddingEdgeCaseTest
+{
+    private static final Instant NOW=Instant.parse("2026-06-11T12:00:00Z");
 
     private Fakes.Users users;
     private Fakes.Items items;
@@ -37,130 +34,158 @@ class BiddingEdgeCaseTest {
     private User seller, alice, bob;
     private Category category;
 
+    // Fresh fakes and a service with a frozen clock before every test
     @BeforeEach
-    void setUp() {
-        users = new Fakes.Users();
-        items = new Fakes.Items();
-        Fakes.Bids bids = new Fakes.Bids();
-        Fakes.AutoBids autoBids = new Fakes.AutoBids();
-        Fakes.Notifier notifier = new Fakes.Notifier();
+    void setUp()
+    {
+        users=new Fakes.Users();
+        items=new Fakes.Items();
+        Fakes.Bids bids=new Fakes.Bids();
+        Fakes.AutoBids autoBids=new Fakes.AutoBids();
+        Fakes.Notifier notifier=new Fakes.Notifier();
 
-        service = new BiddingService(items, bids, autoBids, users, notifier) {
+        service=new BiddingService(items, bids, autoBids, users, notifier)
+        {
             @Override
-            protected Instant now() {
+            protected Instant now()
+            {
                 return NOW;
             }
         };
 
-        seller = users.save(new User("seller", "h", UserRole.USER));
-        alice = users.save(new User("alice", "h", UserRole.USER));
-        bob = users.save(new User("bob", "h", UserRole.USER));
-        category = TestIds.withId(new Category("Test", "d"), 1L);
+        seller=users.save(new User("seller", "h", UserRole.USER));
+        alice=users.save(new User("alice", "h", UserRole.USER));
+        bob=users.save(new User("bob", "h", UserRole.USER));
+        category=TestIds.withId(new Category("Test", "d"), 1L);
     }
 
-    private Item item(String start) {
+    // An active auction of the test seller, ending in a day
+    private Item item(String start)
+    {
         return items.save(new Item(seller, category, "Item",
                 new BigDecimal(start), NOW.plusSeconds(86400)));
     }
 
     // ---- amounts around the minimum -------------------------------------
 
-    @ParameterizedTest(name = "bid {0} on a 100 auction is too low")
-    @ValueSource(strings = {"0", "1", "50", "99", "100", "104", "104.99"})
-    void amountsBelowTheMinimumAreRejected(String amount) {
-        Item it = item("100");   // min next bid = 105
+    // Seven amounts under the 105 minimum are all refused
+    @ParameterizedTest(name="bid {0} on a 100 auction is too low")
+    @ValueSource(strings={"0", "1", "50", "99", "100", "104", "104.99"})
+    void amountsBelowTheMinimumAreRejected(String amount)
+    {
+        Item it=item("100"); // min next bid = 105
         assertThrows(BidTooLowException.class,
-                () -> service.placeBid(it.getId(), alice.getId(), new BigDecimal(amount)));
+                ()->service.placeBid(it.getId(), alice.getId(), new BigDecimal(amount)));
     }
 
-    @ParameterizedTest(name = "bid {0} on a 100 auction is accepted")
-    @ValueSource(strings = {"105", "105.01", "200", "10000"})
-    void amountsAtOrAboveTheMinimumAreAccepted(String amount) {
-        Item it = item("100");
-        BidOutcome out = service.placeBid(it.getId(), alice.getId(), new BigDecimal(amount));
+    // The minimum itself and anything above it are accepted
+    @ParameterizedTest(name="bid {0} on a 100 auction is accepted")
+    @ValueSource(strings={"105", "105.01", "200", "10000"})
+    void amountsAtOrAboveTheMinimumAreAccepted(String amount)
+    {
+        Item it=item("100");
+        BidOutcome out=service.placeBid(it.getId(), alice.getId(), new BigDecimal(amount));
         assertEquals(alice.getId(), out.leaderId());
     }
 
+    // On a 340 auction the exact minimum of 350 is accepted
     @Test
-    void exactlyTheMinimumIsAccepted() {
-        Item it = item("340");   // ladder: 340 -> +10 -> 350
-        BidOutcome out = service.placeBid(it.getId(), alice.getId(), new BigDecimal("350"));
+    void exactlyTheMinimumIsAccepted()
+    {
+        Item it=item("340"); // ladder: 340 -> +10 -> 350
+        BidOutcome out=service.placeBid(it.getId(), alice.getId(), new BigDecimal("350"));
         assertEquals(alice.getId(), out.leaderId());
     }
 
     // ---- auction state ---------------------------------------------------
 
+    // A SOLD item takes no more bids
     @Test
-    void biddingOnASoldAuctionIsRejected() {
-        Item it = item("100");
+    void biddingOnASoldAuctionIsRejected()
+    {
+        Item it=item("100");
         it.setStatus(ItemStatus.SOLD);
         items.save(it);
         assertThrows(AuctionClosedException.class,
-                () -> service.placeBid(it.getId(), alice.getId(), new BigDecimal("500")));
+                ()->service.placeBid(it.getId(), alice.getId(), new BigDecimal("500")));
     }
 
+    // A CLOSED item takes no more bids
     @Test
-    void biddingOnAClosedAuctionIsRejected() {
-        Item it = item("100");
+    void biddingOnAClosedAuctionIsRejected()
+    {
+        Item it=item("100");
         it.setStatus(ItemStatus.CLOSED);
         items.save(it);
         assertThrows(AuctionClosedException.class,
-                () -> service.placeBid(it.getId(), alice.getId(), new BigDecimal("500")));
+                ()->service.placeBid(it.getId(), alice.getId(), new BigDecimal("500")));
     }
 
+    // Being still ACTIVE is not enough once the end time has passed
     @Test
-    void biddingAfterTheEndDateIsRejected() {
-        Item expired = items.save(new Item(seller, category, "Old",
+    void biddingAfterTheEndDateIsRejected()
+    {
+        Item expired=items.save(new Item(seller, category, "Old",
                 new BigDecimal("100"), NOW.minusSeconds(60)));
         assertThrows(AuctionClosedException.class,
-                () -> service.placeBid(expired.getId(), alice.getId(), new BigDecimal("500")));
+                ()->service.placeBid(expired.getId(), alice.getId(), new BigDecimal("500")));
     }
 
     // ---- buy now ---------------------------------------------------------
 
+    // Buy-now needs a buy-now price on the item
     @Test
-    void buyNowWithoutAPriceIsRejected() {
-        Item it = item("100");   // no buy-now price set
+    void buyNowWithoutAPriceIsRejected()
+    {
+        Item it=item("100"); // no buy-now price set
         assertThrows(BuyNowNotAvailableException.class,
-                () -> service.buyNow(it.getId(), alice.getId()));
+                ()->service.buyNow(it.getId(), alice.getId()));
     }
 
+    // Buy-now marks the item SOLD, at the buy-now price
     @Test
-    void buyNowClosesTheAuctionAndSetsTheWinner() {
-        Item it = item("100");
+    void buyNowClosesTheAuctionAndSetsTheWinner()
+    {
+        Item it=item("100");
         it.setBuyNowPrice(new BigDecimal("600"));
         items.save(it);
 
-        BidOutcome out = service.buyNow(it.getId(), alice.getId());
+        BidOutcome out=service.buyNow(it.getId(), alice.getId());
 
         assertEquals(ItemStatus.SOLD, it.getStatus());
         assertEquals(alice.getId(), it.getWinner().getId());
         assertEquals(0, out.currentPrice().compareTo(new BigDecimal("600")));
     }
 
+    // The second buyer is refused, so an item can sell only once
     @Test
-    void buyNowOnAnAlreadySoldItemIsRejected() {
-        Item it = item("100");
+    void buyNowOnAnAlreadySoldItemIsRejected()
+    {
+        Item it=item("100");
         it.setBuyNowPrice(new BigDecimal("600"));
         items.save(it);
         service.buyNow(it.getId(), alice.getId());
 
         assertThrows(AuctionClosedException.class,
-                () -> service.buyNow(it.getId(), bob.getId()));
+                ()->service.buyNow(it.getId(), bob.getId()));
     }
 
     // ---- unknown ids -----------------------------------------------------
 
+    // An unknown item id is reported clearly
     @Test
-    void biddingOnAnUnknownItemIsRejected() {
+    void biddingOnAnUnknownItemIsRejected()
+    {
         assertThrows(ItemNotFoundException.class,
-                () -> service.placeBid(9999L, alice.getId(), new BigDecimal("500")));
+                ()->service.placeBid(9999L, alice.getId(), new BigDecimal("500")));
     }
 
+    // An unknown bidder id is reported clearly
     @Test
-    void biddingAsAnUnknownUserIsRejected() {
-        Item it = item("100");
+    void biddingAsAnUnknownUserIsRejected()
+    {
+        Item it=item("100");
         assertThrows(UserNotFoundException.class,
-                () -> service.placeBid(it.getId(), 9999L, new BigDecimal("500")));
+                ()->service.placeBid(it.getId(), 9999L, new BigDecimal("500")));
     }
 }

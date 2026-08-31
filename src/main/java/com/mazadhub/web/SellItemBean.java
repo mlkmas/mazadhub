@@ -13,14 +13,16 @@ import jakarta.inject.Named;
 import java.math.BigDecimal;
 import java.util.List;
 
-/** "List a new item for sale" form. Requires a logged-in seller. */
+// Backs the "list a new item for sale" form
 @Named
 @RequestScoped
-public class SellItemBean {
-
+public class SellItemBean
+{
+    // creates the item, injected by the container
     @Inject
     private ItemService items;
 
+    // tells us who the seller is
     @Inject
     private SessionBean session;
 
@@ -30,49 +32,119 @@ public class SellItemBean {
     private String title;
     private String description;
     private BigDecimal startPrice;
-    private BigDecimal buyNowPrice;   // optional
-    private int durationDays = 7;
+    private BigDecimal buyNowPrice; // optional
+    private int durationDays=7;
     private String imageUrl;
 
+    // Loads the category drop-down when the bean is created
     @PostConstruct
-    public void init() {
-        categories = items.listCategories();
+    public void init()
+    {
+        categories=items.listCategories();
     }
 
-    /** Redirects guests to login before the page renders. */
-    public String guard() {
-        return session.isLoggedIn() ? null : "login?faces-redirect=true";
+    // Sends a visitor to the login page before the form is shown
+    public String guard()
+    {
+        return session.isLoggedIn()?null:"login?faces-redirect=true";
     }
 
-    public String publish() {
-        if (!session.isLoggedIn()) {
+    // Creates the auction and jumps to its item page, or shows what went wrong
+    public String publish()
+    {
+        if(!session.isLoggedIn())
+        {
             return "login?faces-redirect=true";
         }
-        try {
-            Item created = items.listForSale(session.getUserId(), categoryId, title, description,
+
+        try
+        {
+            Item created=items.listForSale(session.getUserId(), categoryId, title, description,
                     startPrice, buyNowPrice, durationDays, imageUrl);
-            return "item?faces-redirect=true&id=" + created.getId();
-        } catch (RuntimeException e) {
+            return "item?faces-redirect=true&id="+created.getId();
+        }
+        catch(RuntimeException e)
+        {
             FacesContext.getCurrentInstance().addMessage(null,
                     new FacesMessage(FacesMessage.SEVERITY_ERROR,
-                            e.getMessage() != null ? e.getMessage() : "Could not list the item.", null));
+                            e.getMessage()!=null?e.getMessage():"Could not list the item.", null));
             return null;
         }
     }
 
-    public List<Category> getCategories() { return categories; }
-    public Long getCategoryId() { return categoryId; }
-    public void setCategoryId(Long v) { this.categoryId = v; }
-    public String getTitle() { return title; }
-    public void setTitle(String v) { this.title = v; }
-    public String getDescription() { return description; }
-    public void setDescription(String v) { this.description = v; }
-    public BigDecimal getStartPrice() { return startPrice; }
-    public void setStartPrice(BigDecimal v) { this.startPrice = v; }
-    public BigDecimal getBuyNowPrice() { return buyNowPrice; }
-    public void setBuyNowPrice(BigDecimal v) { this.buyNowPrice = v; }
-    public int getDurationDays() { return durationDays; }
-    public void setDurationDays(int v) { this.durationDays = v; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String v) { this.imageUrl = v; }
+    // getters / setters used by the JSF pages and services
+    public List<Category> getCategories()
+    {
+        return categories;
+    }
+
+    public Long getCategoryId()
+    {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long v)
+    {
+        this.categoryId=v;
+    }
+
+    public String getTitle()
+    {
+        return title;
+    }
+
+    public void setTitle(String v)
+    {
+        this.title=v;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String v)
+    {
+        this.description=v;
+    }
+
+    public BigDecimal getStartPrice()
+    {
+        return startPrice;
+    }
+
+    public void setStartPrice(BigDecimal v)
+    {
+        this.startPrice=v;
+    }
+
+    public BigDecimal getBuyNowPrice()
+    {
+        return buyNowPrice;
+    }
+
+    public void setBuyNowPrice(BigDecimal v)
+    {
+        this.buyNowPrice=v;
+    }
+
+    public int getDurationDays()
+    {
+        return durationDays;
+    }
+
+    public void setDurationDays(int v)
+    {
+        this.durationDays=v;
+    }
+
+    public String getImageUrl()
+    {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String v)
+    {
+        this.imageUrl=v;
+    }
 }

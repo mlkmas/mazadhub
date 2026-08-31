@@ -5,25 +5,25 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.math.BigDecimal;
 import java.util.logging.Logger;
 
-/**
- * Default {@link NotificationPort} that logs events. Lets the application run
- * end-to-end before the JMS implementation (Day 9) is added; the JMS version
- * will implement the same port.
- */
+// Default implementation: writes the events to the server log, used when JMS is not configured
 @ApplicationScoped
-public class LoggingNotificationService implements NotificationPort {
+public class LoggingNotificationService implements NotificationPort
+{
+    private static final Logger LOG=Logger.getLogger(LoggingNotificationService.class.getName());
 
-    private static final Logger LOG = Logger.getLogger(LoggingNotificationService.class.getName());
-
+    // Logs a new price
     @Override
-    public void bidPlaced(long itemId, BigDecimal currentPrice, Long leaderId) {
-        LOG.info(() -> "Bid placed on item " + itemId + ": price=" + currentPrice
-                + ", leader=" + leaderId);
+    public void bidPlaced(long itemId, BigDecimal currentPrice, Long leaderId)
+    {
+        LOG.info(()->"Bid placed on item "+itemId+": price="+currentPrice
+                +", leader="+leaderId);
     }
 
+    // Logs a closed auction
     @Override
-    public void auctionClosed(long itemId, BigDecimal finalPrice, Long winnerId) {
-        LOG.info(() -> "Auction closed for item " + itemId + ": finalPrice=" + finalPrice
-                + ", winner=" + winnerId);
+    public void auctionClosed(long itemId, BigDecimal finalPrice, Long winnerId)
+    {
+        LOG.info(()->"Auction closed for item "+itemId+": finalPrice="+finalPrice
+                +", winner="+winnerId);
     }
 }

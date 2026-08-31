@@ -7,14 +7,12 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
-/**
- * Auction result for the seller. The winner's contact details are shown only
- * when the item is SOLD, and only to the seller who listed it.
- */
+// Result screen a seller sees once their auction has finished
 @Named
 @RequestScoped
-public class SellerResultBean {
-
+public class SellerResultBean
+{
+    // reads the finished item, injected by the container
     @Inject
     private ItemService items;
 
@@ -24,23 +22,43 @@ public class SellerResultBean {
     private Long itemId;
     private Item item;
 
-    public String load() {
-        if (!session.isLoggedIn()) {
+    // Loads the item and turns away anyone who is not its seller
+    public String load()
+    {
+        if(!session.isLoggedIn())
+        {
             return "login?faces-redirect=true";
         }
-        item = items.getById(itemId);
+
+        item=items.getById(itemId);
         // Only the seller may see the result.
-        if (item.getSeller() == null || !item.getSeller().getId().equals(session.getUserId())) {
+        if(item.getSeller()==null||!item.getSeller().getId().equals(session.getUserId()))
+        {
             return "catalog?faces-redirect=true";
         }
+
         return null;
     }
 
-    public boolean isSold() {
-        return item != null && item.getStatus() == ItemStatus.SOLD && item.getWinner() != null;
+    // True when the auction ended with a winner
+    public boolean isSold()
+    {
+        return item!=null&&item.getStatus()==ItemStatus.SOLD&&item.getWinner()!=null;
     }
 
-    public Long getItemId() { return itemId; }
-    public void setItemId(Long v) { this.itemId = v; }
-    public Item getItem() { return item; }
+    // getters / setters used by the JSF pages and services
+    public Long getItemId()
+    {
+        return itemId;
+    }
+
+    public void setItemId(Long v)
+    {
+        this.itemId=v;
+    }
+
+    public Item getItem()
+    {
+        return item;
+    }
 }

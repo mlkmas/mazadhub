@@ -6,13 +6,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-/**
- * An immutable snapshot of the state of an auction at a point in time, holding
- * exactly what the bidding rules need to validate a bid.
- */
+// Read-only picture of an auction, holding just what the bid rules need to judge a bid
 public record AuctionSnapshot(ItemStatus status, BigDecimal currentPrice, Instant endTime)
 {
-
+    // Compact constructor, all three fields are required
     public AuctionSnapshot
     {
         Objects.requireNonNull(status, "status");
@@ -20,9 +17,9 @@ public record AuctionSnapshot(ItemStatus status, BigDecimal currentPrice, Instan
         Objects.requireNonNull(endTime, "endTime");
     }
 
-    /** True if the auction is open for bidding at the given instant. */
+    // True while the auction is ACTIVE and its end time has not passed
     public boolean isOpenAt(Instant now)
     {
-        return status == ItemStatus.ACTIVE && now.isBefore(endTime);
+        return status==ItemStatus.ACTIVE&&now.isBefore(endTime);
     }
 }

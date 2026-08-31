@@ -10,58 +10,54 @@ import jakarta.jms.Topic;
 import java.math.BigDecimal;
 import java.util.logging.Logger;
 
-/**
- * JMS implementation of {@link NotificationPort}. Publishes auction events to a
- * publish/subscribe <em>topic</em>, so every interested subscriber (all browsers
- * currently watching an item) receives a copy — that is exactly the fan-out the
- * "live price update" requirement needs.
- *
- * <p>Marked {@code @Alternative} and enabled in {@code beans.xml}, so it takes
- * the place of {@link LoggingNotificationService} without touching any service
- * class — the whole point of programming against a port.
- *
- * <p>Requires these GlassFish resources (see the setup guide):
- * connection factory {@code jms/mazadhubFactory} and topic {@code jms/auctionTopic}.
- */
+// Publishes auction events to a JMS topic, so every browser watching the item gets a copy
+// Enabled as an @Alternative in beans.xml; needs jms/mazadhubFactory and jms/auctionTopic in GlassFish
 @Alternative
 @ApplicationScoped
-public class JmsNotificationService implements NotificationPort {
+public class JmsNotificationService implements NotificationPort
+{
+    private static final Logger LOG=Logger.getLogger(JmsNotificationService.class.getName());
 
-    private static final Logger LOG = Logger.getLogger(JmsNotificationService.class.getName());
-
+    // the JMS session used to send messages, injected by the container
     @Inject
     private JMSContext context;
 
-    @Resource(lookup = "jms/auctionTopic")
+    // the publish/subscribe topic every watcher listens to
+    @Resource(lookup="jms/auctionTopic")
     private Topic auctionTopic;
 
+    // Publishes a BID event with the new price
     @Override
-    public void bidPlaced(long itemId, BigDecimal currentPrice, Long leaderId) {
+    public void bidPlaced(long itemId, BigDecimal currentPrice, Long leaderId)
+    {
         publish("BID", itemId, currentPrice, leaderId);
     }
 
+    // Publishes a CLOSED event with the final price
     @Override
-    public void auctionClosed(long itemId, BigDecimal finalPrice, Long winnerId) {
+    public void auctionClosed(long itemId, BigDecimal finalPrice, Long winnerId)
+    {
         publish("CLOSED", itemId, finalPrice, winnerId);
     }
 
-    /**
-     * Sends one event as a JMS message. The body is small JSON; the item id also
-     * goes on a property so subscribers can filter by item with a JMS selector.
-     */
-    private void publish(String type, long itemId, BigDecimal price, Long userId) {
-        try {
-            String json = "{\"type\":\"" + type
-                    + "\",\"itemId\":" + itemId
-                    + ",\"price\":" + (price == null ? "null" : price.toPlainString())
-                    + ",\"userId\":" + (userId == null ? "null" : userId)
-                    + "}";
+    // Sends one event as small JSON, with the item id as a property so subscribers can filter
+    private void publish(String type, long itemId, BigDecimal price, Long userId)
+    {
+        try
+        {
+            String json="{\"type\":\""+type
+                    +"\",\"itemId\":"+itemId
+                    +",\"price\":"+(price==null?"null":price.toPlainString())
+                    +",\"userId\":"+(userId==null?"null":userId)
+                    +"}";
             context.createProducer()
                     .setProperty("itemId", itemId)
                     .send(auctionTopic, json);
-        } catch (RuntimeException e) {
+        }
+        catch(RuntimeException e)
+        {
             // Never let a messaging problem break a bid that already committed.
-            LOG.warning("Could not publish " + type + " for item " + itemId + ": " + e.getMessage());
+            LOG.warning("Could not publish "+type+" for item "+itemId+": "+e.getMessage());
         }
     }
 }

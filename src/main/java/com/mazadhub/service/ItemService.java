@@ -18,77 +18,91 @@ import java.time.Instant;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/**
- * Listing items for sale and browsing / searching the catalogue.
- */
+// Listing items for sale and browsing or searching the catalogue
 @ApplicationScoped
-public class ItemService {
-
+public class ItemService
+{
     private ItemRepository items;
     private CategoryRepository categories;
     private UserRepository users;
 
-    protected ItemService() {
-        // for the CDI proxy
+    // CDI needs a no-argument constructor
+    protected ItemService()
+    {
     }
 
+    // Repositories are injected by the container
     @Inject
-    public ItemService(ItemRepository items, CategoryRepository categories, UserRepository users) {
-        this.items = items;
-        this.categories = categories;
-        this.users = users;
+    public ItemService(ItemRepository items, CategoryRepository categories, UserRepository users)
+    {
+        this.items=items;
+        this.categories=categories;
+        this.users=users;
     }
 
-    /**
-     * Lists a new item for sale, running for {@code durationDays} from now.
-     */
+    // Lists a new item for sale, running for durationDays from now
     @Transactional
     public Item listForSale(long sellerId, long categoryId, String title, String description,
                             BigDecimal startPrice, BigDecimal buyNowPrice,
-                            int durationDays, String imageUrl) {
-        User seller = users.findById(sellerId)
-                .orElseThrow(() -> new UserNotFoundException(sellerId));
-        Category category = categories.findById(categoryId)
-                .orElseThrow(() -> new NoSuchElementException("Category not found: " + categoryId));
-        if (durationDays <= 0) {
+                            int durationDays, String imageUrl)
+    {
+        User seller=users.findById(sellerId)
+                .orElseThrow(()->new UserNotFoundException(sellerId));
+        Category category=categories.findById(categoryId)
+                .orElseThrow(()->new NoSuchElementException("Category not found: "+categoryId));
+        if(durationDays<=0)
+        {
             throw new IllegalArgumentException("durationDays must be positive");
         }
-        if (startPrice == null || startPrice.signum() < 0) {
+
+        if(startPrice==null||startPrice.signum()<0)
+        {
             throw new IllegalArgumentException("startPrice must be >= 0");
         }
 
-        Instant end = now().plus(Duration.ofDays(durationDays));
-        Item item = new Item(seller, category, title, startPrice, end);
+        Instant end=now().plus(Duration.ofDays(durationDays));
+        Item item=new Item(seller, category, title, startPrice, end);
         item.setDescription(description);
         item.setImageUrl(imageUrl);
         item.setBuyNowPrice(buyNowPrice);
         return items.save(item);
     }
 
-    public Item getById(long itemId) {
+    // One item, or ItemNotFoundException if the id is unknown
+    public Item getById(long itemId)
+    {
         return items.findById(itemId)
-                .orElseThrow(() -> new ItemNotFoundException(itemId));
+                .orElseThrow(()->new ItemNotFoundException(itemId));
     }
 
-    public List<Category> listCategories() {
+    // Every category, for the catalogue side bar and the sell form
+    public List<Category> listCategories()
+    {
         return categories.findAll();
     }
 
-    public List<Item> browseByCategory(long categoryId) {
-        Category category = categories.findById(categoryId)
-                .orElseThrow(() -> new NoSuchElementException("Category not found: " + categoryId));
+    // Active auctions in one category
+    public List<Item> browseByCategory(long categoryId)
+    {
+        Category category=categories.findById(categoryId)
+                .orElseThrow(()->new NoSuchElementException("Category not found: "+categoryId));
         return items.findActiveByCategory(category);
     }
 
-    public List<Item> search(String keyword) {
-        if (keyword == null || keyword.isBlank()) {
+    // Active auctions whose title contains the keyword
+    public List<Item> search(String keyword)
+    {
+        if(keyword==null||keyword.isBlank())
+        {
             return List.of();
         }
+
         return items.searchActiveByKeyword(keyword.trim());
     }
 
-    /** Overridable clock seam for testing. */
-    protected Instant now() {
+    // Clock in one place, so tests can freeze time
+    protected Instant now()
+    {
         return Instant.now();
     }
 }
